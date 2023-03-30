@@ -4,9 +4,8 @@ import { startBot } from './helpers';
 import configMiddleware from './middlewares/appMiddleware';
 import configRoutes from './routes';
 
-const app: Application = express();
-
 const main = async () => {
+  const app: Application = express();
   // Middlewares
   configMiddleware(app);
   // Routes
