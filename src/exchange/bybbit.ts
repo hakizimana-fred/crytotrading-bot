@@ -12,7 +12,12 @@ import { CONFIG } from "../config/config";
 class ByBitExchange {
   private linear: LinearClient;
 
-  constructor(params: { key: string; secret: string; testnet: boolean, url: string }) {
+  constructor(params: {
+    key: string;
+    secret: string;
+    testnet: boolean;
+    url: string;
+  }) {
     this.linear = new LinearClient(params);
   }
 
@@ -34,11 +39,19 @@ class ByBitExchange {
     close_on_trigger: boolean;
     price: number;
   }): Promise<any | null> {
+
     const order = await this.linear.placeActiveOrder(params);
+    const { ret_code, ret_msg, result } = order;
 
-    console.log("Place order", order);
-
-    return null;
+    if (ret_code === 0 && ret_msg === "OK" && result) {
+      if (Object.keys(result).length > 0) {
+        return {
+          ...result,
+        };
+      }
+    }else {
+      return null
+    }
   }
 
   async getWalletBallance(params: CoinParam): Promise<WalletBalances | null> {
@@ -54,5 +67,5 @@ export const bybit = new ByBitExchange({
   key: CONFIG.API_KEY,
   secret: CONFIG.API_SECRET,
   testnet: CONFIG.TEST_NET,
-  url: CONFIG.URL
+  url: CONFIG.URL,
 });
