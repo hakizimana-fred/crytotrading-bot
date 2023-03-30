@@ -10,7 +10,7 @@ export const placeOrder = async (req: Request, res: Response) => {
       order_type,
       qty,
       time_in_force: 'GoodTillCancel',
-      reduce_only: false,
+      reduce_only: side === 'Sell' ? true : false,
       close_on_trigger: false,
       price,
     });
