@@ -31,7 +31,6 @@ class ByBitExchange {
   async placeActiveOrder(params: NewLinearOrder): Promise<LinearOrder | null> {
     const order = await this.linear.placeActiveOrder(params);
     const { ret_code, ret_msg, result } = order;
-
     if (ret_code === 0 && ret_msg === 'OK' && result) {
       if (Object.keys(result).length > 0) {
         return {
@@ -49,6 +48,8 @@ class ByBitExchange {
 
     return null;
   }
+
+  async getMarketPrice() {}
 }
 
 export const bybit = new ByBitExchange({
