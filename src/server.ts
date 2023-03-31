@@ -11,6 +11,14 @@ const main = async () => {
   // Routes
   configRoutes(app);
 
+  // middleware for invalid routes
+  app.use((req, res, next) => {
+    return res.json({
+      success: false,
+      message: 'Route invalid',
+    });
+  });
+
   app.listen(CONFIG.PORT, () => {
     console.log(`server starting on port ${CONFIG.PORT}`);
     startBot();

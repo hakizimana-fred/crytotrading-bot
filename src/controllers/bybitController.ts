@@ -24,3 +24,19 @@ export const placeOrder = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const viewOrders = async (req: Request, res: Response) => {
+  const { symbol } = req.body;
+  try {
+    const orders = await bybit.viewOrders({ symbol });
+    return res
+      .status(200)
+      .json({ success: true, message: 'View orders', data: orders });
+  } catch (e) {
+    return res.status(400).json({
+      success: true,
+      error: e.message,
+      message: 'Trade did not go through',
+    });
+  }
+};

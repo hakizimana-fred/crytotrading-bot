@@ -1,6 +1,7 @@
 import {
   CoinParam,
   LinearClient,
+  LinearGetOrderRequest,
   LinearOrder,
   NewLinearOrder,
   SymbolParam,
@@ -46,6 +47,12 @@ class ByBitExchange {
 
     console.log(myEth);
 
+    return null;
+  }
+
+  async viewOrders(params: LinearGetOrderRequest): Promise<any> {
+    const openOrders = await this.linear.getActiveOrderList(params);
+    if (openOrders) return openOrders;
     return null;
   }
 
