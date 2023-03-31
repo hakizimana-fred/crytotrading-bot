@@ -43,20 +43,30 @@ class ByBitExchange {
   }
 
   async getWalletBallance(params: CoinParam): Promise<WalletBalances | null> {
-    const myEth = await this.linear.getWalletBalance(params);
-
-    console.log(myEth);
-
+    const { ret_code, ret_msg, result } = await this.linear.getWalletBalance(
+      params
+    );
+    if (ret_code === 0 && ret_msg === 'OK' && result) {
+      return result;
+    }
     return null;
   }
 
+  /**
+   * @param {function(params): LinearGetOrderRequest} Promise
+   * */
   async viewOrders(params: LinearGetOrderRequest): Promise<any> {
     const openOrders = await this.linear.getActiveOrderList(params);
     if (openOrders) return openOrders;
     return null;
   }
 
-  async getMarketPrice() {}
+  /** @return {boolean} */
+  async cancelOrders(params: SymbolParam): Promise<boolean> {
+    const canceledorders = await this.linear.cancelAllActiveOrders(params);
+    if (canceledorders) return true;
+    return false;
+  }
 }
 
 export const bybit = new ByBitExchange({

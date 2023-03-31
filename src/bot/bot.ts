@@ -49,11 +49,6 @@ bot.action('sell', async (ctx) => {
   }
 });
 
-// bot.command('search', (ctx) => {
-//   const args = ctx.message.text.split(' ').slice(1); // extract arguments after the command
-//   console.log(args);
-// });
-
 const getOrderType = (ctx: Context) => {
   ctx.reply(
     'Please select Order Type',
@@ -129,7 +124,7 @@ const limitOrder = () => {
       };
       const order = (await bybit.placeActiveOrder(_params)) as LinearOrder;
       if (order) {
-        ctx.reply('You successfully placed a Sell order');
+        ctx.reply('You successfully placed a Limit order');
       } else {
         ctx.reply('Something went wrong while placing order!');
       }
