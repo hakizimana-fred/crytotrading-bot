@@ -9,6 +9,11 @@ import {
 } from 'bybit-api';
 import { CONFIG } from '../config/config';
 
+/**
+ * Represents byBitExchange
+ *
+ * @class
+ */
 class ByBitExchange {
   private linear: LinearClient;
 
@@ -21,14 +26,10 @@ class ByBitExchange {
     this.linear = new LinearClient(params);
   }
 
-  async getOrderBook(params: SymbolParam): Promise<any[] | null> {
-    const order = await this.linear.getOrderBook({ symbol: params.symbol });
-    if (order) {
-      return [order];
-    }
-    return null;
-  }
-
+  /**
+   * @param {function(params): NewLinearOrder}
+   * @return {Promise<LinearOrder | null>}
+   * */
   async placeActiveOrder(params: NewLinearOrder): Promise<LinearOrder | null> {
     const order = await this.linear.placeActiveOrder(params);
     const { ret_code, ret_msg, result } = order;
@@ -42,6 +43,10 @@ class ByBitExchange {
     return null;
   }
 
+  /**
+   * @param {function(params): CoinParam}
+   * @return {Promise<WalletBalances | null>}
+   * */
   async getWalletBallance(params: CoinParam): Promise<WalletBalances | null> {
     const { ret_code, ret_msg, result } = await this.linear.getWalletBalance(
       params
@@ -53,7 +58,8 @@ class ByBitExchange {
   }
 
   /**
-   * @param {function(params): LinearGetOrderRequest} Promise
+   * @param {function(params): LinearGetOrderRequest}
+   * @return {Promise<any>}
    * */
   async viewOrders(params: LinearGetOrderRequest): Promise<any> {
     const openOrders = await this.linear.getActiveOrderList(params);
