@@ -5,9 +5,12 @@ export const orderSchema = Z.object({
     message: 'Side is required',
   }),
   price: Z.number().nullable().optional(),
-  symbol: Z.string({ required_error: 'Symbol is required' })
+  symbol: Z.string()
     .min(1)
-    .regex(/^[A-Z]{1,5}$/),
+    .regex(/^[A-Z]{6,10}$/)
+    .refine((value) => /^[A-Z]{6,10}$/.test(value), {
+      message: 'Invalid symbol. Symbol must contain 1-5 uppercase letters.',
+    }),
   order_type: Z.enum(['Limit', 'Market']).refine((value) => value !== null, {
     message: 'order_type is required',
   }),
@@ -23,8 +26,9 @@ export const validSymbol = (symbol: string) => {
   if (!symbol) {
     errors.symbol = 'Symbol cannot be empty';
   }
-  if (!symbol.match(/^[A-Z]{1,5}$/)) {
-    errors.symbol = 'Invalid symbol';
+  if (!symbol.match(/^[A-Z]{6,10}$/)) {
+    errors.symbol =
+      'Invalid symbol. Symbol must consist of 6 to 10 uppercase letters.';
   }
 
   return errors;

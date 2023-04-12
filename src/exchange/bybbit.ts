@@ -8,6 +8,8 @@ import {
   WalletBalances,
 } from 'bybit-api';
 import { CONFIG } from '../config/config';
+import { sleep } from '../helpers';
+import { IChaseOrder } from '../types/interface';
 
 /**
  * Represents byBitExchange
@@ -39,6 +41,8 @@ class ByBitExchange {
           ...result,
         };
       }
+    } else {
+      console.log(order, 'full order');
     }
     return null;
   }
@@ -73,6 +77,52 @@ class ByBitExchange {
     if (canceledorders) return true;
     return false;
   }
+
+  async getPrice(params: SymbolParam): Promise<any> {
+    const price = await this.linear.getTickers(params);
+
+    return price;
+  }
+
+  async chaseOrder(params: IChaseOrder) {
+    const { orderId, symbol, side } = params;
+    let count: number = 0;
+    const maxretries = 100;
+
+    while (true) {
+      if (!orderId) {
+        console.log(`No orderId was provided`);
+        break;
+      }
+      await sleep(10000);
+
+      let livePrice = await this.getPrice({ symbol });
+      const { result } = livePrice;
+      let livePairPrice = result[0].last_price;
+      livePairPrice = parseFloat(livePairPrice); // parsing prices
+      if (!livePairPrice) {
+        console.log('no price fetched');
+        break;
+      }
+      livePairPrice =
+        side === 'Buy' ? livePairPrice - 0.05 : livePairPrice + 0.05;
+
+      const {
+        ret_code,
+        result: res,
+        ret_msg,
+      } = await this.linear.replaceActiveOrder({
+        symbol,
+        order_id: orderId,
+        p_r_price: parseFloat(livePairPrice),
+      });
+
+      count += 1;
+      if (Object.keys(res).length === 0 || count === maxretries) {
+        break;
+      }
+    }
+  }
 }
 
 export const bybit = new ByBitExchange({
@@ -81,3 +131,6 @@ export const bybit = new ByBitExchange({
   testnet: CONFIG.TEST_NET,
   url: CONFIG.URL,
 });
+
+
+

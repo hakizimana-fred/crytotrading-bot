@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import 'nodejs-dashboard';
 import { CONFIG } from './config/config';
 import { startBot } from './helpers';
 import configMiddleware from './middlewares/appMiddleware';
@@ -22,6 +23,7 @@ const main = async () => {
   app.listen(CONFIG.PORT, () => {
     console.log(`server starting on port ${CONFIG.PORT}`);
     startBot();
+    //priceMonitor('ETHUSDT');
   });
 };
 

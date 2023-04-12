@@ -7,6 +7,7 @@ export const placeOrder = async (req: Request, res: Response) => {
     const { side, price, symbol, order_type, qty } = orderSchema.parse(
       req.body
     );
+
     const myActiveOrder = await bybit.placeActiveOrder({
       side,
       symbol,
@@ -18,7 +19,25 @@ export const placeOrder = async (req: Request, res: Response) => {
       price: price ? price : undefined,
     });
 
-    return res.status(200).json({ success: true, data: myActiveOrder });
+    if (order_type === 'Market')
+      return res.status(200).json({ success: true, data: myActiveOrder });
+
+    // call our chase order method
+
+    const orderId = myActiveOrder?.order_id;
+    if (orderId !== undefined) {
+      await bybit.chaseOrder({
+        side,
+        symbol,
+        orderId,
+      });
+      return res.json({
+        status: true,
+        message: 'Your order was a success',
+      });
+    }
+
+    return res.json('Order Id was needed');
   } catch (err) {
     const error: any = {
       message: 'Validation failed',
@@ -44,12 +63,8 @@ export const viewOrders = async (req: Request, res: Response) => {
     return res
       .status(200)
       .json({ success: true, message: 'View orders', data: orders });
-  } catch (e) {
-    return res.status(400).json({
-      success: true,
-      error: e.message,
-      message: 'Trade did not go through',
-    });
+  } catch (err) {
+    return res.status(400).send(err.message);
   }
 };
 
@@ -78,10 +93,16 @@ export const walletBalance = async (req: Request, res: Response) => {
   const { symbol } = req.body;
 
   try {
-    const errors = validSymbol(symbol);
-    if (Object.keys(errors).length > 0)
-      return res.status(400).json({ success: false, errors: errors.symbol });
+    if (!symbol)
+      return res
+        .status(400)
+        .json({ success: false, errors: 'Symbol is required' });
 
+    if (!symbol.match(/^[A-Z]{3,6}$/)) {
+      return res
+        .status(400)
+        .json({ success: false, errors: 'Symbol might be invalid' });
+    }
     const balance = await bybit.getWalletBallance(symbol);
     const data = {};
     for (const key in balance) {
@@ -98,6 +119,36 @@ export const walletBalance = async (req: Request, res: Response) => {
         .status(200)
         .json({ success: true, message: 'Nothing was found', data: {} });
     }
+  } catch (e) {
+    return res.status(400).json({
+      success: true,
+      error: e.message,
+      message: 'something went wrong',
+    });
+  }
+};
+
+export const prices = async (req: Request, res: Response) => {
+  const { symbol } = req.body;
+  try {
+    const errors = validSymbol(symbol);
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ success: false, errors: errors.symbol });
+    }
+
+    const { result } = await bybit.getPrice({ symbol });
+    let lastPrice;
+
+    for (const price of result) {
+      const { last_price } = price;
+      lastPrice = last_price;
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: lastPrice,
+      message: 'Fetched price successfully',
+    });
   } catch (e) {
     return res.status(400).json({
       success: true,
